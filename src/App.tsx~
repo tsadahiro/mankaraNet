@@ -1,0 +1,105 @@
+import { useState } from 'react'
+
+type GameState = {
+  cells: number[][]; // ボードの状態
+  turn: number; // 0 or 1 手番
+}
+
+function App() {
+  const [gameState, setGameState] = useState<GameState>(init());
+  const scale = 100;
+
+  function init(){
+    //const cells = [[3,3,3,3,3,3,0],[3,3,3,3,3,3,0]];
+    //const cells = [[1,1,1,1,1,1,0],[1,1,1,1,1,1,0]];
+    const cells = [[3,3,3,0],[3,3,3,0]];
+    return {cells:cells, turn:0};
+  }
+
+  function f(r,j){
+    console.log(r,j);
+    if (r != gameState.turn){
+      return;
+    }
+    const x0 = gameState.cells[0].slice(0);
+    const x1 = gameState.cells[1].slice(0);
+    const x = [x0, x1];
+    const N = x[0].length;
+    const R = 2*N-1;
+    const wrap = Math.floor(x[r][j]/R);
+    console.log(wrap);
+    
+    function phi(k,i){
+      //console.log(k,i, (i-j + N*Math.abs(k-gameState.turn)+R)%R, gameState.cells[r][j]%R);
+      //console.log((i - j + N*Math.abs(k-gameState.turn)+R)%R <= x[r][j]%R);
+      const a = (i-j + N*Math.abs(k-gameState.turn)+R)%R;
+      const b = gameState.cells[r][j]%R;
+      console.log("("+k+","+i+")",a, b, a<=b, gameState.turn);
+      if (i == N-1 && k != gameState.turn){ // point of the player not at turn does not change
+	return gameState.cells[k][i];
+      }
+      else if (i == j && k == gameState.turn){ // the cell clicked is once cleared
+	return wrap;
+      }
+      else if (a <= b){
+	console.log("here");
+	return x[k][i] + wrap + 1;
+      }else{
+	return x[k][i] + wrap;
+      }
+    }
+    
+    for (let k = 0; k < 2; k++){
+      for (let i = 0; i < x[0].length; i++){
+	x[k][i] = phi(k,i);
+      }
+    }
+
+    let sum0 = 0;
+    for (let v of x[r]) sum0+=v;
+    let sum1 = 0;
+    for (let v of x[(r+1)%2]) sum1+=v;
+    if (sum0 == 0){
+      setGameState({cells:x, turn: (gameState.turn +0)%2});
+    }else{
+      setGameState({cells:x, turn: (gameState.turn +1)%2});
+    }
+  }
+
+
+  function Cell({i,j,num}){
+    const N = gameState.cells[0].length;
+    const y = (j==(N-1))? (scale/2) : ((i==0)? scale:0);
+    const x =  (i==0)? (scale*(j+1)) : (scale*(N-1-j)); 
+    const transform = "translate("+x+","+y+")"
+    return(
+      <g transform={transform} onClick={()=>f(i,j)}>
+        <rect width={scale} height={scale} fill="khaki" stroke="white"/>
+        <circle cy={scale/2} cx={scale/2} r={scale/2.5} fill="white"/>
+        <text y={scale*3/5} x={scale/3} fontSize={scale/2}>{num}</text>
+      </g>
+    )
+  }
+  
+  function Board(){
+    const cells = [[],[]];
+    const N = gameState.cells[0].length;
+    for (let i=0; i<2; i++){
+      for (let j=0; j<N; j++){
+        cells[i][j]=<Cell i={i} j={j} num={gameState.cells[i][j]}/>
+      }
+    }
+    return(
+    <svg width={(N+1)*scale} height={2*scale}>
+      {cells}
+    </svg>)
+  }
+
+  return(
+    <>
+    <Board/>
+    </>
+  )
+}
+
+export default App

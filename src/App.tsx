@@ -1,6 +1,6 @@
 import { useRef, useState, useCallback } from 'react'
 import { Button, Stack, TextField } from '@mui/material'
-import {nowInSec, uuidV4, SkyWayStreamFactory, SkyWayContext, SkyWayRoom, SkyWayAuthToken, LocalDataStream } from '@skyway-sdk/room';
+import {nowInSec, uuidV4, SkyWayStreamFactory, SkyWayContext, SkyWayRoom, SkyWayAuthToken } from '@skyway-sdk/room';
 
 type Player = {
   id: any;
@@ -10,7 +10,7 @@ type Player = {
 type GameState = {
   cells: number[][]; // ボードの状態
   turn: number; // 0 or 1 手番
-  started: bool;
+  started: boolean;
   players: Player[];
 }
 
@@ -56,7 +56,7 @@ function App() {
     return (me.id === gameState.players[gameState.turn].id);
   }
 
-  function f(r,j){
+  function f(r:number, j:number){
     if (!isMyTurn()) return;
     console.log(r,j);
     if (r != gameState.turn){
@@ -70,7 +70,7 @@ function App() {
     const wrap = Math.floor(x[r][j]/R);
     console.log(wrap);
     
-    function phi(k,i){
+    function phi(k:number, i:number){
       const a = (i-j + N*Math.abs(k-gameState.turn)+R)%R;
       const b = gameState.cells[r][j]%R;
       console.log("("+k+","+i+")",a, b, a<=b, gameState.turn);
@@ -105,7 +105,7 @@ function App() {
   }
 
 
-  function Cell({i,j,num}){
+  function Cell({i,j,num}:{i:number, j:number, num:number}){
     const N = gameState.cells[0].length;
     const y = (j==(N-1))? (scale/2) : ((i==0)? scale:0);
     const x =  (i==0)? (scale*(j+1)) : (scale*(N-1-j)); 
@@ -133,11 +133,11 @@ function App() {
   
   function Board(){
     if (!gameState.started) return;
-    const cells = [[],[]];
+    const cells:any[][] = [[],[]];
     const N = gameState.cells[0].length;
     for (let i=0; i<2; i++){
       for (let j=0; j<N; j++){
-        cells[i][j]=<Cell i={i} j={j} num={gameState.cells[i][j]}/>
+        cells[i][j]=(<Cell i={i} j={j} num={gameState.cells[i][j]}/>)
       }
     }
     return(
@@ -146,7 +146,7 @@ function App() {
     </svg>)
   }
 
-  const join = useCallback(async (nickname, roomName) => {
+  const join = useCallback(async (nickname:string, roomName:string) => {
     const context = await SkyWayContext.Create(token);
 
     // ルームを取得、または新規作成

@@ -95,11 +95,20 @@ function App() {
     }
 
     let sum0 = 0;
-    for (let v of x[r]) sum0+=v;
+    for (let i = 0; i < N-1; i++) {
+      sum0+=x[r][i];
+    }
     let sum1 = 0;
-    for (let v of x[(r+1)%2]) sum1+=v;
+    for (let i = 0; i < N-1; i++) {
+      sum1+=x[(r+1)%2][i];
+    }
     const newturn = (sum0 == 0)? (gameState.turn)%2 : (gameState.turn + 1)%2
-    const newstate = {cells:x, turn:newturn, players:gameState.players, started:gameState.started};
+    const newstate = {
+      cells:x,
+      turn:newturn,
+      players:gameState.players,
+      started:gameState.started
+    };
     setGameState(newstate);
     dataStream?.write(JSON.stringify({newstate:newstate}));
   }
@@ -113,7 +122,8 @@ function App() {
     return(
       <g transform={transform} onClick={()=>f(i,j)}>
         <rect width={scale} height={scale} fill="khaki" stroke="white"/>
-        <circle cy={scale/2} cx={scale/2} r={scale/2.5} fill={(gameState.turn==i && j!=(N-1)) ?"pink":"white"}/>
+        <circle cy={scale/2} cx={scale/2} r={scale/2.5}
+		fill={(gameState.turn==i && j!=(N-1)) ?"pink":(j==(N-1)? "white":"gray")}/>
         <text y={scale*3/5} x={scale/3} fontSize={scale/2}>{num}</text>
       </g>
     )
